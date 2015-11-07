@@ -8,7 +8,7 @@ const LOADING_POKEMON = {
 
 const fetchJSON = (url) => fetch(url).then(resp => resp.json())
 
-const pokemon = (id) => {
+const pokemon = ({id}) => {
   return fetchJSON(`${POKEAPI_HOST}/api/v1/pokemon/${id}`)
           .then(pokemon => {
             return Promise.all(pokemon.sprites.map(sprite => {
@@ -26,12 +26,12 @@ export default class PokemonDetail extends React.Component {
   }
 
   componentDidMount(){
-    pokemon(this.props.params.pkdx_id).then(pokemon => this.setState({pokemon}));
+    pokemon({id: this.props.params.pkdx_id}).then(pokemon => this.setState({pokemon}));
   }
 
   componentWillReceiveProps(props){
     this.setState({pokemon: LOADING_POKEMON});
-    pokemon(props.params.pkdx_id).then(pokemon => this.setState({pokemon}));
+    pokemon({id: props.params.pkdx_id}).then(pokemon => this.setState({pokemon}));
   }
 
   render(){
