@@ -1,4 +1,5 @@
 import React from 'react';
+import Transmit from "react-transmit";
 
 const POKEAPI_HOST = "http://pokeapi.co";
 const LOADING_POKEMON = {
@@ -8,7 +9,7 @@ const LOADING_POKEMON = {
 
 const fetchJSON = (url) => fetch(url).then(resp => resp.json())
 
-const pokemon = ({id}) => {
+const pokemonAPI = ({id}) => {
   return fetchJSON(`${POKEAPI_HOST}/api/v1/pokemon/${id}`)
           .then(pokemon => {
             return Promise.all(pokemon.sprites.map(sprite => {
@@ -18,23 +19,21 @@ const pokemon = ({id}) => {
           });
 };
 
-export default class PokemonDetail extends React.Component {
+class PokemonDetail extends React.Component {
 
   constructor(...args){
     super(...args);
-    this.state = {pokemon: LOADING_POKEMON};
-  }
-
-  componentDidMount(){
-    pokemon({id: this.props.params.pkdx_id}).then(pokemon => this.setState({pokemon}));
+    this.state = {pokemon: this.props.pokemon || LOADING_POKEMON};
   }
 
   componentWillReceiveProps(props){
-    this.setState({pokemon: LOADING_POKEMON});
-    pokemon({id: props.params.pkdx_id}).then(pokemon => this.setState({pokemon}));
+    console.log('componentWillReceiveProps', props);
+    //this.setState({pokemon: LOADING_POKEMON});
+    //pokemonAPI({id: props.params.pkdx_id}).then(pokemon => this.setState({pokemon}));
   }
 
   render(){
+    console.log('PokemonDetail Render')
     return(
       <div className="">
         <div>
@@ -50,3 +49,22 @@ export default class PokemonDetail extends React.Component {
     );
   }
 }
+
+export default Transmit.createContainer(PokemonDetail, {
+  initialVariables: {
+		oPokemon: {},
+    id: null
+	},
+	fragments: {
+    pokemon: function({oPokemon, id}){
+      console.log('Pokemon fragment', id);
+      return pokemonAPI({id})
+              .then(pokemon => {
+                return pokemon;
+              })
+              .catch(error => {
+                console.error('Error', error);
+              })
+    }
+  }
+});

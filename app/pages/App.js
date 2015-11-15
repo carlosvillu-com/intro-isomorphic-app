@@ -1,5 +1,5 @@
+import 'isomorphic-fetch';
 import React from 'react';
-import styles from './App.css';
 
 import Pokemons from '../components/pokemons'
 
@@ -8,13 +8,14 @@ export default class App extends React.Component {
     super(props);
   }
   render() {
+    //const children = React.cloneElement(this.props.children, {variables: {id: this.props.params.pkdx_id}});
     return (
-      <div className={styles.app}>
+      <div className="App" style={{display: 'flex'}}>
         <div className="Pokemons">
-          <Pokemons />
+          <Pokemons _onFetch={(data) => console.log('onFetch', data)}/>
         </div>
         <div>
-          {this.props.children || "Selecciona un pokemon!!"}
+          {this.props.children}
         </div>
       </div>
     );

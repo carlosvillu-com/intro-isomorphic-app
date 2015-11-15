@@ -6,6 +6,14 @@ import webpackMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import config from './webpack.config.js';
 
+import React from 'react';
+import {RoutingContext, match} from "react-router";
+import {createHistory} from "history";
+import routes from './app/routes';
+import {readFileSync} from 'fs';
+import Transmit from "react-transmit";
+
+
 const isDeveloping = process.env.NODE_ENV !== 'production';
 const port = isDeveloping ? 3000 : process.env.PORT;
 const app = express();
@@ -32,7 +40,22 @@ if (isDeveloping) {
 }
 
 app.get('*', function response(req, res) {
-  res.sendFile(path.join(__dirname, 'dist/index.html'));
+
+  match({routes, location: req.url}, (error, redirectLocation, renderProps) => {
+
+    Transmit.renderToString(RoutingContext, renderProps).then(({reactString, reactData}) => {
+
+      console.log(reactString, reactData);
+
+      const html = readFileSync(__dirname + '/views/index.html')
+                    .toString()
+                    .replace('#APP#', reactString);
+      const output = Transmit.injectIntoMarkup(html, reactData, ['/main.js'])
+      res.send(output);
+    }).catch(console.error.bind(console));
+
+  });
+
 });
 
 app.listen(port, 'localhost', function onStart(err) {

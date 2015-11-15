@@ -1,21 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router'
+import Transmit from "react-transmit";
 
-export default class Pokemons extends React.Component {
+class Pokemons extends React.Component {
 
   constructor(...args){
     super(...args);
-    this.state = {pokemons: []};
-  }
-
-  componentDidMount(){
-    fetch('http://pokeapi.co/api/v1/pokemon/?limit=50')
-      .then(resp => resp.json())
-      .then(pokemons => {
-        this.setState({
-          pokemons: pokemons.objects
-        });
-      });
+    this.state = {pokemons: this.props.pokemons || [] }
   }
 
   render(){
@@ -35,3 +26,20 @@ export default class Pokemons extends React.Component {
     );
   }
 }
+
+export default Transmit.createContainer(Pokemons, {
+  initialVariables: {
+		aPokemons: [],
+	},
+	fragments: {
+    pokemons: function({aPokemons}){
+      console.log('Pokemons fragment');
+      return fetch('http://pokeapi.co/api/v1/pokemon/?limit=10')
+              .then(resp => resp.json())
+              .then( pokemonsList => {
+                return aPokemons.concat(pokemonsList.objects)
+              })
+              .catch(console.error.bind(console));
+    }
+  }
+});
